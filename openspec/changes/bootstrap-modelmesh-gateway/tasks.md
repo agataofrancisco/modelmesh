@@ -65,4 +65,4 @@
 ## Workflow follow-up
 
 - Validação opcional com providers reais e GIF do painel.
-- Arquivar a change antes de iniciar `add-cost-autopilot`.
+- Arquivar a change após revisão.

@@ -36,4 +36,4 @@ Domínio fictício: a equipa de plataforma da **Órbita Tech** (tenant `orbita`)
 - **Código novo**: `gateway/` (FastAPI), `frontend/`, `migrations/`, `chaos/`, `bench/`, `deploy/` (Prometheus/Grafana) e `docs/`.
 - **Dependências** (confirmar versões): FastAPI, Pydantic v2, httpx, redis-py, SQLAlchemy/Alembic, prometheus-client, OpenTelemetry SDK. LiteLLM é opcional, apenas para normalizar providers, e com a fronteira documentada.
 - **Infraestrutura**: Redis e Postgres. Sem Docker local, os testes de atomicidade usam um Redis real quando disponível (`-m redis`). O fakeredis só serve para testes unitários e não prova a atomicidade.
-- **Fora de âmbito**: streaming SSE (fase 2), embeddings, SSO e routing por custo/qualidade (é a change `add-cost-autopilot`).
+- **Fora de âmbito**: streaming SSE (fase 2), embeddings, SSO e routing por custo/qualidade (é o projecto separado CostPilot, que pode usar o ModelMesh como provider).

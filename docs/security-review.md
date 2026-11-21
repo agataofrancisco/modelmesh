@@ -40,3 +40,14 @@ do próprio autor com os testes do repositório; **não substitui uma revisão i
 
 Versões fixadas em `pyproject.toml` e em `requirements.txt`. Não houve análise de vulnerabilidades
 (SCA) neste ambiente: `TODO: correr pip-audit` antes da entrega.
+
+## Revisão independente do supervisor (2026-11-21)
+
+Verificado no código, depois da auto-revisão acima:
+
+- **Admin:** os routers `/admin` têm `Depends(require_admin)` ao nível do router (`gateway/app/api/admin.py:19`, `admin_ops.py:21`). A comparação é feita em tempo constante (`hmac.compare_digest`) e, sem token configurado, a administração fica fechada.
+- **Chaves virtuais:** só se guarda o `sha256` e o prefixo (`gateway/app/auth/keys.py:43`).
+- **Fail-closed:** quando o Redis falha, o pedido é recusado (`gateway/app/pipeline.py:112`) em vez de servir sem limites.
+- **Proxy de controlo dos mocks** (`admin_ops.py:112`): exige admin e só contacta `control_url` configurados, nunca URLs vindos do pedido, o que limita o risco de SSRF. **Não** deve existir configuração com `control_url` em produção.
+- **`/metrics`:** não tem autenticação na aplicação. A protecção depende do deployment (rede privada), como a spec permite. É um risco residual se o serviço for exposto directamente.
+- **Por verificar:** a atomicidade em Redis real (tarefa 5.1) e o `pip-audit`.

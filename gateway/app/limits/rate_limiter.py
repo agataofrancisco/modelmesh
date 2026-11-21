@@ -56,6 +56,7 @@ class Lease:
     """Resultado de um acquire bem-sucedido. `release` tem de ser chamado sempre (finally)."""
 
     concurrency_keys: list[str]
+    member: str
     released: bool = False
 
 
@@ -70,7 +71,7 @@ class RateLimiter:
     @staticmethod
     def _keys(scope: ScopeLimits, minute: int) -> list[str]:
         base = f"rl:{scope.scope_id}"
-        return [f"{base}:rpm", f"{base}:tpm:{minute}", f"{base}:conc"]
+        return [f"{base}:rpm", f"{base}:tpm:{minute}", f"{base}:conc:v2"]
 
     async def acquire(
         self,
@@ -83,12 +84,14 @@ class RateLimiter:
         now = self._clock.wall_ms()
         minute = now // WINDOW_MS
         keys = self._keys(key_scope, minute) + self._keys(team_scope, minute)
+        request_member = uuid.uuid4().hex
+        lease_member = uuid.uuid4().hex
         args = [
             now,
             WINDOW_MS,
             WINDOW_MS * 2,
             max(0, int(est_tokens)),
-            member or uuid.uuid4().hex,
+            member or request_member,
             self._concurrency_ttl_ms,
             key_scope.rpm,
             key_scope.tpm,
@@ -96,6 +99,7 @@ class RateLimiter:
             team_scope.rpm,
             team_scope.tpm,
             team_scope.concurrency,
+            lease_member,
         ]
         result: list[Any] = await self._acquire(keys=keys, args=args)
         allowed, reason, retry = int(result[0]), int(result[1]), int(result[2])
@@ -105,7 +109,7 @@ class RateLimiter:
                 for scope in (key_scope, team_scope)
                 if scope.concurrency > 0
             ]
-            return Lease(concurrency_keys=conc_keys)
+            return Lease(concurrency_keys=conc_keys, member=lease_member)
         scope_name, kind = _REASONS[reason]
         raise RateLimitDenied(scope_name, kind, retry)
 
@@ -114,4 +118,4 @@ class RateLimiter:
             lease.released = True
             return
         lease.released = True
-        await self._release(keys=lease.concurrency_keys, args=[])
+        await self._release(keys=lease.concurrency_keys, args=[lease.member])

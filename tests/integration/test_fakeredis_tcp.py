@@ -9,6 +9,7 @@ import asyncio
 import os
 import socket
 import threading
+import uuid
 
 import pytest
 import redis.asyncio as aioredis
@@ -63,10 +64,10 @@ async def test_100_concurrent_real_redis_exactly_50():
     except Exception:  # noqa: BLE001 - Redis real indisponível: teste ignorado
         await client.aclose()
         pytest.skip(f"Redis real indisponível em {url}")
-    await client.flushdb()
     limiter = RateLimiter(client, FakeClock(), concurrency_ttl_s=60)
-    key = ScopeLimits("key:real", rpm=50)
-    team = ScopeLimits("team:real")
+    namespace = f"test:{uuid.uuid4().hex}"
+    key = ScopeLimits(f"key:{namespace}", rpm=50)
+    team = ScopeLimits(f"team:{namespace}")
 
     async def attempt() -> bool:
         try:
@@ -75,7 +76,20 @@ async def test_100_concurrent_real_redis_exactly_50():
         except RateLimitDenied:
             return False
 
-    results = await asyncio.gather(*[attempt() for _ in range(100)])
-    assert sum(results) == 50
-    await client.flushdb()
-    await client.aclose()
+    attempts = [asyncio.create_task(attempt()) for _ in range(100)]
+    try:
+        results = await asyncio.gather(*attempts, return_exceptions=True)
+        failure = next((result for result in results if isinstance(result, BaseException)), None)
+        if failure is not None:
+            raise failure
+        assert sum(results) == 50
+    finally:
+        if any(not task.done() for task in attempts):
+            await asyncio.gather(*attempts, return_exceptions=True)
+        try:
+            async for redis_key in client.scan_iter(
+                match=f"rl:*:test:{namespace.split(':', 1)[1]}:*"
+            ):
+                await client.delete(redis_key)
+        finally:
+            await client.aclose()

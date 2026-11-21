@@ -21,8 +21,17 @@ Os motivos são `rpm`, `tpm` e `concurrency`, para a chave e para a equipa.
   `ZADD` regista).
 - TPM: contador por minuto (`rl:<âmbito>:tpm:<minuto>`), incrementado pela estimativa de entrada
   mais `max_tokens`.
-- Concorrência: `INCR` na entrada, `DECR` no `finally` (`release.lua`), com um TTL de segurança
-  (`concurrency_safety_ttl_s`) para o caso de o processo morrer.
+- Concorrência: cada pedido recebe um membro único num sorted set `:conc:v2`. O script usa `TIME`
+  do Redis como relógio, remove leases vencidos, verifica ambos os âmbitos e adiciona o lease
+  atomicamente. A pontuação é o instante de expiração; a chave expira no maior score para que uma
+  réplica com TTL mais curto não apague leases mais longos. `release.lua` remove apenas o membro
+  daquele pedido. Se o processo morrer, o lease expira sem libertar o lease de outro pedido.
+- Redis 7 é necessário para usar `TIME` em Lua com replicação determinística de efeitos; Compose e
+  CI fixam `redis:7`.
+- `:conc:v2` usa um pool separado do contador antigo. O rollout deve parar admissão, drenar todos
+  os pedidos e retirar todas as réplicas antigas antes de activar v2. No rollback, parar admissão,
+  drenar v2 e retirar todas as réplicas v2 antes de reactivar a versão antiga. Um marcador apenas
+  em runtime não consegue vedar o split-brain de limites entre versões mistas.
 
 Teste com a concorrência real do mesmo código (fakeredis em processo, Lua real via lupa):
 `tests/integration/test_limits_budget.py::test_rpm_100_concurrent_exactly_50_accepted` → 50
@@ -67,5 +76,5 @@ Pendente.
    script no servidor.
 2. **Porque é que o TPM é estimado à entrada?** A saída só se conhece depois. Reservamos
    `max_tokens` para ser conservadores. O erro de estimativa é documentado em `08-precos-e-custos.md`.
-3. **O que acontece se o processo morrer com um lease ativo?** O `DECR` não corre, mas o TTL da
-   chave de concorrência expira e o contador volta a zero.
+3. **O que acontece se o processo morrer com um lease ativo?** A remoção no `finally` não corre,
+   mas a pontuação do lease expira e o próximo acquire remove-o sem afectar os outros membros.

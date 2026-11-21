@@ -2,7 +2,7 @@
 -- Verifica TODOS os limites e só depois incrementa. Ou tudo, ou nada.
 --
 -- KEYS (6): rpm_k, tpm_k, conc_k, rpm_t, tpm_t, conc_t   (cada âmbito: RPM, TPM, concorrência)
--- ARGV: 1 now_ms | 2 window_ms | 3 tpm_key_ttl_ms | 4 est_tokens | 5 member | 6 conc_ttl_ms
+-- ARGV: 1 client now_ms (RPM/TPM) | 2 window_ms | 3 tpm_key_ttl_ms | 4 est_tokens | 5 member | 6 conc_ttl_ms | 13 lease_member
 --       7 rpm_limit_k | 8 tpm_limit_k | 9 conc_limit_k | 10 rpm_limit_t | 11 tpm_limit_t | 12 conc_limit_t
 -- Limite 0 = sem limite.
 -- Devolve {allowed (0|1), reason, retry_after_ms}.
@@ -14,6 +14,9 @@ local tpm_ttl = tonumber(ARGV[3])
 local est = tonumber(ARGV[4])
 local member = ARGV[5]
 local conc_ttl = tonumber(ARGV[6])
+local lease_member = ARGV[13]
+local redis_time = redis.call('TIME')
+local lease_now = tonumber(redis_time[1]) * 1000 + math.floor(tonumber(redis_time[2]) / 1000)
 
 local rpm_limits = { tonumber(ARGV[7]), tonumber(ARGV[10]) }
 local tpm_limits = { tonumber(ARGV[8]), tonumber(ARGV[11]) }
@@ -48,7 +51,8 @@ for s = 1, 2 do
   end
 
   if conc_limits[s] > 0 then
-    local current = tonumber(redis.call('GET', ck) or '0')
+    redis.call('ZREMRANGEBYSCORE', ck, '-inf', lease_now)
+    local current = redis.call('ZCARD', ck)
     if current + 1 > conc_limits[s] then
       return { 0, offset + 3, 1000 }
     end
@@ -70,8 +74,9 @@ for s = 1, 2 do
     redis.call('PEXPIRE', tk, tpm_ttl)
   end
   if conc_limits[s] > 0 then
-    redis.call('INCR', ck)
-    redis.call('PEXPIRE', ck, conc_ttl)
+    redis.call('ZADD', ck, lease_now + conc_ttl, lease_member)
+    local latest = redis.call('ZREVRANGE', ck, 0, 0, 'WITHSCORES')
+    redis.call('PEXPIREAT', ck, tonumber(latest[2]))
   end
 end
 

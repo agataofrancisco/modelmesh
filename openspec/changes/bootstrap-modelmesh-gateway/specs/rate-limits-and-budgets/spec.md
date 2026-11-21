@@ -9,6 +9,8 @@ Impedir que uma equipa ou chave exceda o seu ritmo ou o seu orçamento, mesmo so
 ### Requirement: Rate limit atómico
 O gateway SHALL aplicar limites de pedidos por minuto, tokens por minuto (estimados à entrada) e pedidos simultâneos por chave e por equipa. A verificação e o incremento MUST ser atómicos.
 
+Os leases de concorrência SHALL usar sorted sets com expiração individual baseada no relógio do servidor Redis. A chave de armazenamento versionada `:conc:v2` exige rollout coordenado: parar a admissão, drenar pedidos e remover todas as réplicas antigas antes de activar v2. Para rollback, parar admissão, drenar v2 e remover todas as réplicas v2 antes de reactivar a versão anterior. Um marcador em runtime não consegue impedir que réplicas antigas e novas admitam pedidos em pools separados.
+
 #### Scenario: 100 pedidos concorrentes
 - **WHEN** 100 pedidos simultâneos chegam a uma chave com limite de 50 RPM
 - **THEN** exactamente 50 são aceites e 50 recebem `429` com `code: "rate_limited"` e `Retry-After`

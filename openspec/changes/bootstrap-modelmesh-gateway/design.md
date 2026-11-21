@@ -28,7 +28,8 @@ Uma interface `ProviderAdapter.chat(request) -> Response | ProviderError`, com a
 ### D3 — Rate limit com scripts Lua no Redis
 - RPM: janela deslizante com sorted set (`ZREMRANGEBYSCORE` + `ZCARD` + `ZADD` num script Lua, portanto atómico).
 - TPM estimado: contador por janela de minuto com estimativa de tokens (tokenizador aproximado; documentar o erro).
-- Concorrência: contador `INCR`/`DECR` com TTL de segurança. O `DECR` está num `finally`.
+- Concorrência: leases individuais num sorted set versionado (`:conc:v2`), com expiração pelo relógio do servidor Redis (`TIME`) e remoção por membro no `finally`. O script exige Redis 7 para replicação determinística de efeitos com `TIME`.
+- Migração para `:conc:v2`: parar admissão, drenar todos os pedidos e remover todas as réplicas antigas antes de activar v2; rollback segue a ordem inversa. Sem uma barreira externa, um marcador em runtime não consegue impedir pools separados durante rollout misto.
 - *Alternativa:* token bucket. Também é válido. Escolhemos a janela deslizante pela precisão no teste "exactamente 50 de 100". Explicar o trade-off memória vs precisão.
 
 ### D4 — Orçamentos: reserva atómica em Redis, verdade em Postgres

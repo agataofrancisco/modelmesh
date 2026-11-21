@@ -1,6 +1,5 @@
 """Tarefas 3.1-3.2 e 4.1/4.3: endpoint de inferência, alias de classe, fallback e erros."""
 
-
 from tests.support import ADMIN_TOKEN, default_policy
 
 ADMIN = {"authorization": f"Bearer {ADMIN_TOKEN}"}

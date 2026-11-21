@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from gateway.app.api.schemas import ChatCompletionRequest
 from gateway.app.auth.dependencies import Principal, authenticate_inference
 from gateway.app.errors import GatewayError
+from gateway.app.observability.tracing import extract_parent_context
 
 router = APIRouter(prefix="/v1", tags=["inference"])
 
@@ -59,5 +60,8 @@ async def chat_completions(
         raise GatewayError("invalid_request", _first_validation_message(exc)) from exc
 
     request_id = request.state.request_id
-    result = await request.app.state.pipeline.handle(chat_request, principal, request_id=request_id)
+    parent_ctx = extract_parent_context(request.headers)
+    result = await request.app.state.pipeline.handle(
+        chat_request, principal, request_id=request_id, parent_ctx=parent_ctx
+    )
     return JSONResponse(content=result.body, headers=result.headers)

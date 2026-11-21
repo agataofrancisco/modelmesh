@@ -1,0 +1,55 @@
+{
+  "providers": "mock",
+  "date_utc": "2026-11-21T06:36:13.679845+00:00",
+  "commit": "7743a42",
+  "worktree_dirty": true,
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "cpu_count": 8,
+    "python": "3.12.10"
+  },
+  "load": {
+    "requests_per_scenario": 300,
+    "concurrency": 8,
+    "warmup": 30,
+    "client": "httpx.AsyncClient",
+    "transport": "HTTP localhost"
+  },
+  "scenarios": {
+    "direct_to_mock_a": {
+      "n": 300,
+      "errors": 0,
+      "p50_ms": 134.405,
+      "p95_ms": 314.848,
+      "p99_ms": 384.913,
+      "mean_ms": 155.003
+    },
+    "gateway_no_fallback": {
+      "n": 300,
+      "errors": 0,
+      "p50_ms": 352.451,
+      "p95_ms": 1086.856,
+      "p99_ms": 1587.817,
+      "mean_ms": 442.149
+    },
+    "gateway_with_fallback_a_fails": {
+      "n": 300,
+      "errors": 0,
+      "p50_ms": 508.918,
+      "p95_ms": 1782.492,
+      "p99_ms": 2717.861,
+      "mean_ms": 697.093
+    }
+  },
+  "overhead": {
+    "gateway_vs_direct_p50_ms": 218.046,
+    "gateway_vs_direct_p95_ms": 772.008,
+    "gateway_vs_direct_p99_ms": 1202.904
+  },
+  "limitations": [
+    "Providers simulados (mock) em localhost; latência de rede real não medida.",
+    "Redis é fakeredis em processo (não é Redis real): o custo de rede do Redis real não entra.",
+    "Medição feita numa só máquina e sem isolamento de CPU; o ruído é o do sistema operativo."
+  ]
+}

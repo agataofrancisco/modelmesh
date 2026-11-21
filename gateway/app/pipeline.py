@@ -118,12 +118,13 @@ class ChatPipeline:
         principal: Principal,
         *,
         request_id: str,
+        parent_ctx: Any = None,
     ) -> ChatResult:
         clock = self._s.clock
         started_ms = clock.monotonic_ms()
         now = datetime.now(UTC)
 
-        with self._tracer.start_as_current_span("chat.completions") as root:
+        with self._tracer.start_as_current_span("chat.completions", context=parent_ctx) as root:
             root.set_attribute("modelmesh.team", principal.team_id)
             root.set_attribute("modelmesh.request_id", request_id)
             trace_id = format(root.get_span_context().trace_id, "032x")

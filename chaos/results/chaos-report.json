@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-11-21T06:35:20.226374+00:00",
+  "providers": "mock",
+  "redis_backend": "fakeredis em processo (FakeAsyncRedis com Lua via lupa); não é Redis real",
+  "transport": "ASGI em processo (sem sockets)",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "duration_s": 25.51,
+  "limitations": [
+    "Providers simulados; não extrapolar para providers reais.",
+    "Redis real não disponível neste ambiente: cenários de concorrência usam fakeredis.",
+    "Sem Docker: o stack Prometheus/Grafana não foi exercitado."
+  ],
+  "results": [
+    {
+      "scenario": "A falha -> B responde",
+      "passed": true,
+      "detail": "status=200 path=mock_a->mock_b"
+    },
+    {
+      "scenario": "Ambos falham -> 503 com request_id",
+      "passed": true,
+      "detail": "status=503"
+    },
+    {
+      "scenario": "Tempestade de 429",
+      "passed": true,
+      "detail": "status_codes=[503]"
+    },
+    {
+      "scenario": "Provider lento",
+      "passed": true,
+      "detail": "status=200 elapsed_ms=313"
+    },
+    {
+      "scenario": "JSON inválido",
+      "passed": true,
+      "detail": "status=200"
+    },
+    {
+      "scenario": "Usage ausente",
+      "passed": true,
+      "detail": "status=200"
+    },
+    {
+      "scenario": "Redis indisponível (fail-closed)",
+      "passed": true,
+      "detail": "status=503"
+    },
+    {
+      "scenario": "Orçamento de 1 USD sob 200 pedidos concorrentes",
+      "passed": true,
+      "detail": "accepted=6 rejected_402=194 spent_usd=0.990000"
+    }
+  ],
+  "all_passed": true
+}

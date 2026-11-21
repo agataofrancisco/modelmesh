@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -23,6 +25,10 @@ from tests.support import (
     fixed_prices,
     make_settings,
 )
+
+if sys.platform == "win32":
+    # psycopg (modo async) não funciona com o ProactorEventLoop predefinido do Windows.
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 @dataclass

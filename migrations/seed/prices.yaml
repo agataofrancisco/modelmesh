@@ -1,0 +1,32 @@
+# Preços FICTÍCIOS para os providers mock. Não são preços reais de nenhum fornecedor.
+# Cada linha vale a partir de effective_date. Para um pedido, usa-se a linha mais recente
+# com effective_date <= data do pedido (ver gateway/app/accounting/prices.py).
+prices:
+  - provider: mock_a
+    model: mock-small
+    input_per_mtok: 0.50
+    output_per_mtok: 1.50
+    currency: USD
+    effective_date: "2026-01-01"
+    source: "fictício: seed demo ModelMesh (mock_provider_a)"
+  - provider: mock_b
+    model: mock-small
+    input_per_mtok: 0.60
+    output_per_mtok: 1.80
+    currency: USD
+    effective_date: "2026-01-01"
+    source: "fictício: seed demo ModelMesh (mock_provider_b)"
+  - provider: mock_a
+    model: mock-large
+    input_per_mtok: 5.00
+    output_per_mtok: 15.00
+    currency: USD
+    effective_date: "2026-01-01"
+    source: "fictício: seed demo ModelMesh (mock_provider_a)"
+  - provider: mock_b
+    model: mock-large
+    input_per_mtok: 6.00
+    output_per_mtok: 16.00
+    currency: USD
+    effective_date: "2026-01-01"
+    source: "fictício: seed demo ModelMesh (mock_provider_b)"

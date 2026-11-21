@@ -1,0 +1,55 @@
+[project]
+name = "modelmesh"
+version = "0.1.0"
+description = "Gateway compatível com a API OpenAI com policy engine, orçamentos atómicos e testes de chaos"
+requires-python = "==3.12.*"
+dependencies = [
+    "fastapi==0.165.0",
+    "pydantic==2.14.4",
+    "pydantic-settings==2.16.3",
+    "httpx==0.28.1",
+    "redis==8.1.0",
+    "sqlalchemy==2.1.9",
+    "greenlet==3.5.6",
+    "alembic==1.20.1",
+    "aiosqlite==0.22.1",
+    "psycopg[binary]==3.3.9",
+    "prometheus-client==0.26.0",
+    "opentelemetry-api==1.45.2",
+    "opentelemetry-sdk==1.45.2",
+    "opentelemetry-exporter-otlp-proto-http==1.45.2",
+    "uvicorn==0.54.0",
+    "pyyaml==6.0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.2.0",
+    "pytest-asyncio==1.5.0",
+    "fakeredis[lua]==2.40.0",
+    "lupa==2.8",
+    "pgserver==0.1.4",
+    "openai==3.57.0",
+    "ruff==0.17.6",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = [
+    "redis: exige um Redis real acessível em MODELMESH_TEST_REDIS_URL (ignorado se indisponível)",
+    "postgres: arranca um PostgreSQL real com pgserver (lento)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["frontend", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"gateway/app/api/*" = ["B008"]
+"gateway/app/providers/mock_server.py" = ["B008"]

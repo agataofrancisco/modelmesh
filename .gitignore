@@ -1,0 +1,34 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Secrets and local config (never commit)
+.env
+.env.*
+!.env.example
+
+# Runtime data
+.pgdata/
+pgdata/
+.runtime/
+data/
+*.log
+bench/results/*.raw.json
+chaos/results/*.raw.json
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+.DS_Store

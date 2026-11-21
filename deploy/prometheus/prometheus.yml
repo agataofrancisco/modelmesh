@@ -1,0 +1,16 @@
+# Prometheus do ModelMesh. Não testado localmente (sem Docker neste ambiente).
+# O endpoint /metrics deve ficar acessível apenas na rede privada (ver docs/architecture.md).
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+rule_files: []
+
+scrape_configs:
+  - job_name: modelmesh-gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["gateway:8000"]
+        labels:
+          service: modelmesh-gateway
+          environment: dev

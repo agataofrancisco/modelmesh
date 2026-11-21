@@ -1,0 +1,86 @@
+{
+  "__comment": "Dashboard ModelMesh. NÃO testado localmente (sem Docker). Métricas verificadas contra o /metrics do gateway.",
+  "uid": "modelmesh-overview",
+  "title": "ModelMesh - Visão geral",
+  "tags": ["modelmesh"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Pedidos por segundo (por estado)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (status) (rate(modelmesh_request_total[5m]))", "legendFormat": "{{status}}" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Latência p50 / p95 (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.50, sum by (le) (rate(modelmesh_latency_seconds_bucket[5m])))", "legendFormat": "p50" },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(modelmesh_latency_seconds_bucket[5m])))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Fallbacks por par (from -> to)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (from, to) (rate(modelmesh_fallback_total[5m]))", "legendFormat": "{{from}} -> {{to}}" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Erros por motivo",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (reason) (rate(modelmesh_errors_by_reason_total[5m]))", "legendFormat": "{{reason}}" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Custo real estimado (USD/h) por equipa",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (team) (rate(modelmesh_estimated_spend_usd_total[1h])) * 3600", "legendFormat": "{{team}}" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Rejeições: rate limit e orçamento",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (team, scope) (rate(modelmesh_rate_limit_rejections_total[5m]))", "legendFormat": "rate {{team}} {{scope}}" },
+        { "refId": "B", "expr": "sum by (team, scope) (rate(modelmesh_budget_rejections_total[5m]))", "legendFormat": "budget {{team}} {{scope}}" }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Tentativas por provider e resultado",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (provider, outcome) (rate(modelmesh_provider_attempts_total[5m]))", "legendFormat": "{{provider}} {{outcome}}" }
+      ]
+    }
+  ]
+}

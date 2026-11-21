@@ -1,0 +1,89 @@
+# Stack local do ModelMesh. NÃO testado localmente (sem Docker neste ambiente).
+# Segredos vêm de um ficheiro .env LOCAL (não versionado). Ver .env.example.
+name: modelmesh
+
+x-gateway-env: &gateway-env
+  MODELMESH_DATABASE_URL: postgresql+psycopg://modelmesh:${POSTGRES_PASSWORD:?definir POSTGRES_PASSWORD}@postgres:5432/modelmesh
+  MODELMESH_REDIS_URL: redis://redis:6379/0
+  MODELMESH_ADMIN_TOKEN: ${MODELMESH_ADMIN_TOKEN:?definir MODELMESH_ADMIN_TOKEN}
+  MODELMESH_FAIL_CLOSED: "true"
+  MODELMESH_PROVIDERS: >-
+    {"mock_a":{"base_url":"http://mock_a:9001/v1","control_url":"http://mock_a:9001"},
+     "mock_b":{"base_url":"http://mock_b:9002/v1","control_url":"http://mock_b:9002"}}
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: modelmesh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?definir POSTGRES_PASSWORD}
+      POSTGRES_DB: modelmesh
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U modelmesh"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--appendonly", "no", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    environment: *gateway-env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  gateway:
+    build: .
+    environment: *gateway-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    # Sem ports públicos: o acesso externo faz-se por um proxy/balanceador. /metrics fica na rede privada.
+    expose:
+      - "8000"
+
+  mock_a:
+    build: .
+    command: ["python", "-m", "gateway.app.providers.mock_server", "--name", "mock_a", "--port", "9001", "--host", "0.0.0.0"]
+    expose:
+      - "9001"
+
+  mock_b:
+    build: .
+    command: ["python", "-m", "gateway.app.providers.mock_server", "--name", "mock_b", "--port", "9002", "--host", "0.0.0.0"]
+    expose:
+      - "9002"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "127.0.0.1:9090:9090"
+    depends_on:
+      - gateway
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?definir GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:

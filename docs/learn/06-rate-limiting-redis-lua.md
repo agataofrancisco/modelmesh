@@ -41,9 +41,10 @@ Teste com sockets reais de redis-py contra um servidor fakeredis TCP:
 `tests/integration/test_fakeredis_tcp.py::test_100_concurrent_over_tcp_fakeredis_exactly_50`.
 **Rotulado: fakeredis TCP server, não é Redis real.**
 
-Teste com Redis real: `test_100_concurrent_real_redis_exactly_50`, marcado `redis`. **Ignorado
-neste ambiente** porque não há Redis real acessível: `SKIPPED ... Redis real indisponível`.
-Pendente.
+Teste com Redis real: `tests/integration/test_fakeredis_tcp.py::test_100_concurrent_real_redis_exactly_50`,
+marcado `redis` (apesar do nome do módulo conter `fakeredis`, este caso usa a URL
+`MODELMESH_TEST_REDIS_URL` e liga-se a um servidor Redis real). **Ignorado neste ambiente** porque
+não há Redis real acessível: `SKIPPED ... Redis real indisponível`. Pendente.
 
 ## Porquê esta escolha
 

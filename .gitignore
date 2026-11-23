@@ -32,3 +32,4 @@ chaos/results/*.raw.json
 *.swp
 Thumbs.db
 .DS_Store
+.orchestrate/

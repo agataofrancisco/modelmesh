@@ -30,7 +30,7 @@
 
 ## 5. Limites e orçamentos
 
-- [ ] 5.1 Implementar o rate limit RPM/TPM/concorrência com scripts Lua; verificar com o teste de 100 pedidos concorrentes → exactamente 50 aceites em Redis real (`-m redis`)
+- [x] 5.1 Implementar o rate limit RPM/TPM/concorrência com scripts Lua; verificar com o teste de 100 pedidos concorrentes → exactamente 50 aceites em Redis real (`-m redis`, Redis 7.4.11, 2026-11-24)
 - [x] 5.2 Implementar a reserva/reconciliação atómica de orçamento (chave + equipa), a libertação em falha e o sweeper de órfãs; verificar com testes de usage ausente, pedido falhado e crash simulado
 - [x] 5.3 Implementar o fail-closed quando o Redis não está disponível; verificar com teste → 503 e `/health/ready` em 503
 - [x] 5.4 Escrever `docs/learn/06-rate-limiting-redis-lua.md` e `07-orcamentos-reserva-reconciliacao.md` (incluindo a race condition que a atomicidade evita, com o teste que a demonstra); verificar a referência ao teste

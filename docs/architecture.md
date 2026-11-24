@@ -56,5 +56,6 @@ pendentes (`resv:pending`), estado dos circuitos (`cb:<provider>:<modelo>`).
 - Sem streaming (fase 2).
 - Sem Docker neste ambiente: `Dockerfile`, `docker-compose.yml`, `deploy/` e o workflow de CI não
   foram executados; foram validados em sintaxe.
-- Testes de concorrência com Redis real pendentes (ver `docs/learn/07` e `docs/learn/11`).
+- O teste de 100 pedidos concorrentes com limite RPM 50 passou em Redis real 7.4.11
+  (2026-11-24). A prova de orçamento com Redis real continua pendente (ver `docs/learn/07`).
 - A estimativa de tokens é aproximada (~4 caracteres por token).

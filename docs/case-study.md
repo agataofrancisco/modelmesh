@@ -25,8 +25,9 @@ Um gateway compatível com a OpenAI, com:
 
 ## Resultados verificados
 
-- 56 testes passam e 1 é ignorado (Redis real indisponível). A execução completa está no fim deste
-  documento.
+- Na execução anterior, 56 testes passaram e 1 foi ignorado por falta de Redis real.
+  Em 2026-11-24, a prova isolada contra Redis 7.4.11 passou: `1 passed, 56 deselected in 4.48s`.
+  O teste enviou 100 pedidos concorrentes com RPM 50 e confirmou exatamente 50 admissões.
 - Os 8 cenários de chaos passam. Com 200 pedidos concorrentes e orçamento de 1 USD, o gasto final
   foi 0,99 USD, com 194 pedidos rejeitados com `402`.
 - No painel, sob falha forçada do mock A, os três primeiros pedidos fizeram fallback para B e, depois
@@ -36,15 +37,14 @@ Um gateway compatível com a OpenAI, com:
 
 ## O que não está provado
 
-- Comportamento com Redis real e Postgres real sob carga: pendente, a prova em Redis real não foi
-  corrida neste ambiente.
+- Orçamento com Redis real e Redis + Postgres reais sob carga: pendentes. A prova de RPM 50/100
+  foi executada apenas contra Redis real.
 - Stack Prometheus/Grafana e imagem Docker: não testados localmente (sem Docker).
 - Providers reais: não testados; apenas mocks.
 
 ## Próximos passos
 
-1. Correr as provas de concorrência com Redis real (`MODELMESH_TEST_REDIS_URL`) e medir o benchmark
-   com Redis e Postgres reais.
+1. Correr a prova de orçamento com Redis real e medir o benchmark com Redis e Postgres reais.
 2. Validar o stack com Docker (imagem, compose, Prometheus, Grafana).
 3. Revisão de segurança independente e análise de dependências.
 4. Validação opcional com providers reais e gravação de GIF do painel.

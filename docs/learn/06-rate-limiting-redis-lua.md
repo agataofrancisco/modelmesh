@@ -43,8 +43,9 @@ Teste com sockets reais de redis-py contra um servidor fakeredis TCP:
 
 Teste com Redis real: `tests/integration/test_fakeredis_tcp.py::test_100_concurrent_real_redis_exactly_50`,
 marcado `redis` (apesar do nome do módulo conter `fakeredis`, este caso usa a URL
-`MODELMESH_TEST_REDIS_URL` e liga-se a um servidor Redis real). **Ignorado neste ambiente** porque
-não há Redis real acessível: `SKIPPED ... Redis real indisponível`. Pendente.
+`MODELMESH_TEST_REDIS_URL` e liga-se a um servidor Redis real). Executado em 2026-11-24 contra
+Redis 7.4.11 local na porta 6387: `1 passed, 56 deselected in 4.48s`. Os 100 pedidos resultaram
+em exatamente 50 admissões; a asserção do teste passou.
 
 ## Porquê esta escolha
 

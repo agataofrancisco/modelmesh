@@ -50,4 +50,7 @@ Verificado no código, depois da auto-revisão acima:
 - **Fail-closed:** quando o Redis falha, o pedido é recusado (`gateway/app/pipeline.py:112`) em vez de servir sem limites.
 - **Proxy de controlo dos mocks** (`admin_ops.py:112`): exige admin e só contacta `control_url` configurados, nunca URLs vindos do pedido, o que limita o risco de SSRF. **Não** deve existir configuração com `control_url` em produção.
 - **`/metrics`:** não tem autenticação na aplicação. A protecção depende do deployment (rede privada), como a spec permite. É um risco residual se o serviço for exposto directamente.
-- **Por verificar:** a atomicidade em Redis real (tarefa 5.1) e o `pip-audit`.
+- **Por verificar na data desta revisão:** a atomicidade em Redis real (tarefa 5.1) e o `pip-audit`.
+
+Atualização de 2026-11-24: a tarefa 5.1 passou contra Redis 7.4.11 real (`pytest -m redis`:
+`1 passed, 56 deselected`). A análise de dependências com `pip-audit` continua pendente.

@@ -33,3 +33,6 @@ chaos/results/*.raw.json
 Thumbs.db
 .DS_Store
 .orchestrate/
+
+# Ferramentas locais
+.claude-flow/

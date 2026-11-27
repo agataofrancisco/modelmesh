@@ -58,12 +58,16 @@ async def test_100_concurrent_over_tcp_fakeredis_exactly_50(fakeredis_tcp_port):
 @pytest.mark.redis
 async def test_100_concurrent_real_redis_exactly_50():
     url = os.environ.get("MODELMESH_TEST_REDIS_URL", "redis://127.0.0.1:6379/15")
-    client = aioredis.Redis.from_url(url, socket_connect_timeout=0.5)
+    # Sonda curta só para decidir o skip; o cliente do teste usa um timeout de ligação maior,
+    # porque 100 ligações simultâneas via port-forward (ex.: Docker Desktop) passam de 0,5 s.
+    probe = aioredis.Redis.from_url(url, socket_connect_timeout=0.5)
     try:
-        await client.ping()
+        await probe.ping()
     except Exception:  # noqa: BLE001 - Redis real indisponível: teste ignorado
-        await client.aclose()
         pytest.skip(f"Redis real indisponível em {url}")
+    finally:
+        await probe.aclose()
+    client = aioredis.Redis.from_url(url, socket_connect_timeout=5)
     limiter = RateLimiter(client, FakeClock(), concurrency_ttl_s=60)
     namespace = f"test:{uuid.uuid4().hex}"
     key = ScopeLimits(f"key:{namespace}", rpm=50)

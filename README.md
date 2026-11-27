@@ -72,7 +72,7 @@ flowchart LR
 
 Python 3.12 · FastAPI · Redis (Lua scripts) · PostgreSQL / SQLite · SQLAlchemy + Alembic ·
 Prometheus · Grafana · OpenTelemetry · React 19 + Vite · pytest (fakeredis, pgserver) · Ruff ·
-Docker Compose · GitHub Actions
+Docker Compose
 
 ## Quickstart (mock providers, no API keys)
 

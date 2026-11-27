@@ -39,12 +39,12 @@ Um gateway compatível com a OpenAI, com:
 
 - Orçamento com Redis real e Redis + Postgres reais sob carga: pendentes. A prova de RPM 50/100
   foi executada apenas contra Redis real.
-- Stack Prometheus/Grafana e imagem Docker: não testados localmente (sem Docker).
+- Stack Docker verificada em 2026-11-27: 8 serviços, chat completion 200 via gateway, Grafana e Prometheus 200. A verificação revelou e corrigiu dois defeitos (healthcheck herdado pelos mocks e seed demo em falta).
 - Providers reais: não testados; apenas mocks.
 
 ## Próximos passos
 
 1. Correr a prova de orçamento com Redis real e medir o benchmark com Redis e Postgres reais.
-2. Validar o stack com Docker (imagem, compose, Prometheus, Grafana).
+2. Medir o benchmark de overhead dentro da stack Docker (Redis e Postgres reais).
 3. Revisão de segurança independente e análise de dependências.
 4. Validação opcional com providers reais e gravação de GIF do painel.

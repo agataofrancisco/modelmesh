@@ -1,4 +1,4 @@
-# Stack local do ModelMesh. NÃO testado localmente (sem Docker neste ambiente).
+# Stack local do ModelMesh. Verificada com docker compose em 2026-11-27.
 # Segredos vêm de um ficheiro .env LOCAL (não versionado). Ver .env.example.
 name: modelmesh
 
@@ -36,7 +36,8 @@ services:
   migrate:
     build: .
     environment: *gateway-env
-    command: ["alembic", "upgrade", "head"]
+    # Migrações + dados demo idempotentes (equipas, políticas e preços fictícios) antes do gateway.
+    command: ["sh", "-c", "alembic upgrade head && python -m gateway.app.store.seed"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,12 +59,24 @@ services:
     command: ["python", "-m", "gateway.app.providers.mock_server", "--name", "mock_a", "--port", "9001", "--host", "0.0.0.0"]
     expose:
       - "9001"
+    # A imagem herda o HEALTHCHECK do gateway (porta 8000); o mock escuta em 9001.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:9001/control/stats', timeout=2).status == 200 else 1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   mock_b:
     build: .
     command: ["python", "-m", "gateway.app.providers.mock_server", "--name", "mock_b", "--port", "9002", "--host", "0.0.0.0"]
     expose:
       - "9002"
+    # A imagem herda o HEALTHCHECK do gateway (porta 8000); o mock escuta em 9002.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:9002/control/stats', timeout=2).status == 200 else 1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   prometheus:
     image: prom/prometheus:v2.54.1

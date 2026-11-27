@@ -57,7 +57,7 @@
 
 ## 9. Entrega e integração
 
-- [x] 9.1 Dockerfile, `docker-compose.yml` (gateway, redis, postgres, prometheus, grafana, mocks) e CI (Ruff, pytest, testes redis/postgres com services, chaos, build do frontend); verificar a validade do workflow
+- [x] 9.1 Dockerfile, `docker-compose.yml` (gateway, redis, postgres, prometheus, grafana, mocks) e CI (Ruff, pytest, testes redis/postgres com services, chaos, build do frontend); verificar a validade do workflow (2026-11-27: `docker compose up --build --wait` OK a partir de volumes vazios: 8 serviços, gateway e mocks healthy, chat completion 200 via gateway, Grafana e Prometheus 200; corrigidos o healthcheck herdado pelos mocks e o seed demo em falta no `migrate`)
 - [x] 9.2 `README.md`, `docs/architecture.md`, `docs/decisions.md` (incluindo o que é do ModelMesh vs do LiteLLM) e `docs/case-study.md`; verificar que os comandos correm
 - [x] 9.3 `docs/learn/11-perguntas-de-entrevista.md` (≥25 perguntas); verificar a consistência com o código
 - [x] 9.4 Revisão de segurança (chaves, admin, proxy aberto, redacção, fail-closed); verificar que os achados estão resolvidos ou documentados

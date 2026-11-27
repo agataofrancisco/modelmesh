@@ -1,4 +1,4 @@
-# Imagem do gateway. NÃO testada localmente (sem Docker neste ambiente).
+# Imagem do gateway. Verificada com Docker em 2026-11-27.
 FROM python:3.12-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

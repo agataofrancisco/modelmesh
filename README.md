@@ -100,13 +100,21 @@ client.chat.completions.create(model="cheap", messages=[{"role": "user", "conten
 To open the admin panel, run `cd frontend && npm install && npm run dev`, go to
 http://localhost:5173 and enter the admin token.
 
-**Full stack with Docker** (postgres, redis, gateway, two mock providers, Prometheus, Grafana). The
-compose file refuses to start without secrets, so set `POSTGRES_PASSWORD`, `MODELMESH_ADMIN_TOKEN`
-and `GRAFANA_ADMIN_PASSWORD` in your shell first:
+**Full stack with Docker:** postgres, redis, the gateway, two mock providers, Prometheus and
+Grafana. Verified on 2026-11-27 from empty volumes:
+- every service with a healthcheck reports healthy,
+- a chat completion through the gateway returns 200,
+- Grafana and Prometheus answer.
+
+The compose file refuses to start without secrets, so set `POSTGRES_PASSWORD`,
+`MODELMESH_ADMIN_TOKEN` and `GRAFANA_ADMIN_PASSWORD` in your shell first:
 
 ```bash
-docker compose up --build
+docker compose up --build --wait     # migrations and demo teams, policies and prices load automatically
 ```
+
+By design, the gateway has no public port: it sits behind a proxy in production. Grafana
+(`127.0.0.1:3000`) and Prometheus (`127.0.0.1:9090`) are published on localhost only.
 
 ## Quality checks
 
